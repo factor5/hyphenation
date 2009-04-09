@@ -1,4 +1,6 @@
-
+/**
+  * Comments
+  */
 StringFixer = {
 	previewElements : null,
 	fSize : 0,
