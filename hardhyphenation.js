@@ -11,7 +11,7 @@ Hyphenation = {
 	// fSize : 0,
 
 	// letter-spacing in pixels
-	LETT_SPACE :3,
+	LETT_SPACE :0,
 
 	// hyphen character provided with constructor
 	HYPHEN_TYPE :'',
@@ -25,10 +25,10 @@ Hyphenation = {
 	// hyphen
 	HYPHEN :'-',
 
-	// 9 is length of the blanck space
-	BLANKS_WIDTH :7,
+	// 9 is length of the blank space
+	BLANKS_WIDTH :9,
 
-	// 7 is length of the blanck space
+	// 7 is length of the hyphen sign
 	HYPHENS_WIDTH :7,
 
 	// selector for the elements to be processed
@@ -46,7 +46,7 @@ Hyphenation = {
 	findAndFix : function(hyphenType, selector) {
 		if (hyphenType) {
 			this.HYPHEN_TYPE = hyphenType;
-			this.HYPHEN_TYPE_WIDTH = signs12[hyphenType.charCodeAt(0)];
+			this.HYPHEN_TYPE_WIDTH = signs[hyphenType.charCodeAt(0)];
 		} else {
 			return;
 		}
@@ -105,18 +105,26 @@ Hyphenation = {
 		var sum = 0;
 		for ( var i = 0; i < txtLength; i++) {
 			var ch = txt.substring(i, i + 1);
+			var wbr = 0;
+			if ((ch == ' ') || (ch == '-')) {
+				wbr = 1;
+				sum = 0;
+			}
 			// if calculated sum is to overrun the width we need to hyphenate
 			if (sum >= parentWidth) {
-				// insert breacking character
-				resultStr += this.HYPHEN_TYPE;
-				// clear the sum to start a new 'line'
-				sum = 0;
+				if (wbr == 0) {
+					// insert breacking character
+					resultStr += this.HYPHEN_TYPE;
+					// clear the sum to start a new 'line'
+					sum = 0;
+				}
 			}
 			// increment the sum with the width of the current sign
 			// 32 - ascii for 'space', 126 - ascii for '~'
-			if (ch.charCodeAt(0) > 32 && ch.charCodeAt(0) <= 126) {
-				sum += signs12[ch.charCodeAt(0) - 32] + this.LETT_SPACE;
+			if (ch.charCodeAt(0) >= 32 && ch.charCodeAt(0) <= 126) {
+				sum += signs[ch.charCodeAt(0) - 32] + this.LETT_SPACE;
 			}
+
 			// append the current char to the resulting string
 			resultStr += ch;
 		}
@@ -134,6 +142,22 @@ Hyphenation = {
 		var fSize = (rootTag.currentStyle
 				|| (window.getComputedStyle && getComputedStyle(rootTag, null)) || rootTag.style).fontSize;
 		return fSize.substring(0, (fSize.length - 2));
+	},
+	
+	/**
+	 * Helper function that may be used to calculate the letters width.
+	 */
+	calculateWidth : function() {
+		var el = document.getElementById('lett');
+		var el2 = document.getElementById('arr');
+		var chDiv = document.getElementById('ch');
+		var arr = new Array();
+		for (i = 32; i <= 126; i++) {
+			el.innerHTML = String.fromCharCode(i);			
+			arr[i] = el.offsetWidth;
+			el2.innerHTML += (String.fromCharCode(i) + '=' + arr[i] + ', ');
+			chDiv.innerHTML += String.fromCharCode(i) + ', ';
+		}
 	}
 }
 
@@ -147,15 +171,9 @@ String.prototype.trim = function() {
 	return this.replace(/^\s+|\s+$/g, "");
 }
 
-// the widths of the signs from 32 to 126 ascii
-var signs14 = new Array(9, 1, 3, 8, 7, 10, 8, 1, 3, 3, 5, 7, 1, 4, 1, 4, 6, 3, 6,
-		6, 7, 6, 6, 6, 6, 6, 1, 1, 6, 6, 6, 6, 13, 9, 7, 8, 8, 7, 7, 9, 7, 1,
-		5, 8, 7, 9, 7, 9, 7, 9, 8, 7, 7, 7, 9, 13, 8, 9, 8, 2, 4, 2, 5, 8, 2,
-		6, 6, 5, 6, 6, 4, 6, 6, 1, 3, 6, 1, 9, 6, 6, 6, 6, 4, 5, 4, 6, 7, 9, 6,
-		7, 6, 3, 1, 3, 7);
-
-var signs12 = new Array(8, 1, 3, 7, 6, 8, 7, 1, 3, 3, 4, 6, 1, 3, 1, 3, 5, 3, 5,
-		5, 6, 5, 5, 5, 5, 5, 1, 1, 5, 5, 5, 5, 11, 8, 6, 7, 7, 6, 6, 8, 6, 1,
-		4, 7, 6, 8, 6, 8, 6, 8, 7, 6, 6, 6, 8, 11, 7, 8, 7, 2, 3, 2, 4, 7, 2,
-		5, 5, 4, 5, 5, 3, 5, 5, 1, 3, 5, 1, 8, 5, 5, 5, 5, 3, 4, 3, 5, 6, 8, 5,
-		6, 5, 3, 1, 3, 6);
+// the widths of the signs from 32 to 126 ascii when font-size = 12px
+var signs = new Array(8, 3, 4, 7, 7, 11, 8, 2, 4, 4, 5, 7, 3, 4, 3, 3, 7, 7,
+		7, 7, 7, 7, 7, 7, 7, 7, 3, 3, 7, 7, 7, 7, 12, 7, 8, 9, 9, 8, 7, 9, 9,
+		3, 6, 8, 7, 9, 9, 9, 8, 9, 9, 8, 7, 9, 7, 11, 7, 7, 7, 3, 3, 3, 5, 7,
+		4, 7, 7, 6, 7, 7, 3, 7, 7, 3, 3, 6, 3, 11, 7, 7, 7, 7, 4, 7, 3, 7, 5,
+		9, 5, 5, 5, 4, 3, 4, 7);
