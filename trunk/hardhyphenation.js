@@ -47,8 +47,7 @@ Hyphenation = {
 		} else {
 			return;
 		}
-				var fSize = this.getFontSize(document.body);
-		alert('fontSize = ' + fSize);
+
 		this.previewElements = jQuery(this.SELECTOR);
 		// this.fSize = this.getFontSize(document.body);
 		if (this.previewElements.length > 0) {
