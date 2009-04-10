@@ -11,13 +11,13 @@ Hyphenation = {
 	// fSize : 0,
 
 	// letter-spacing in pixels
-	LETT_SPACE : 3,
-	
+	LETT_SPACE :3,
+
 	// hyphen character provided with constructor
-	HYPHEN_TYPE : '',
-	
+	HYPHEN_TYPE :'',
+
 	// hyphens width - calculated in constructor
-	HYPHEN_TYPE_WIDTH : 0,
+	HYPHEN_TYPE_WIDTH :0,
 
 	// black space
 	SPACE :' ',
@@ -26,24 +26,32 @@ Hyphenation = {
 	HYPHEN :'-',
 
 	// 9 is length of the blanck space
-	BLANKS_WIDTH : 9,
+	BLANKS_WIDTH :7,
 
 	// 7 is length of the blanck space
-	HYPHENS_WIDTH : 7,
+	HYPHENS_WIDTH :7,
 
 	// selector for the elements to be processed
-	SELECTOR : '.preview',
+	SELECTOR :'',
 
 	/**
 	 * Main method called onload. Finds all the required elements using jQuery
 	 * and calls a checkContent to process the found elements if any.
 	 * 
-	 * @param hyphenType to be used for the hyphenation
+	 * @param hyphenType
+	 *            to be used for the hyphenation
+	 * @param selector
+	 *            the selector to be used when search for elements to process
 	 */
-	findAndFix : function(hyphenType) {
+	findAndFix : function(hyphenType, selector) {
 		if (hyphenType) {
 			this.HYPHEN_TYPE = hyphenType;
-			this.HYPHEN_TYPE_WIDTH = (hyphenType == ' ') ? this.BLANKS_WIDTH : ((hyphenType == '-') ? this.HYPHENS_WIDTH : '');
+			this.HYPHEN_TYPE_WIDTH = signs12[hyphenType.charCodeAt(0)];
+		} else {
+			return;
+		}
+		if (selector) {
+			this.SELECTOR = selector;
 		} else {
 			return;
 		}
@@ -62,20 +70,20 @@ Hyphenation = {
 	 */
 	checkContent : function() {
 		var len = this.previewElements.length;
-		//var currentCell = null;
+		var currentCell = null;
 		var txt = null;
 		var parentWidth = 0;
 		var fixedString = null;
-		for ( var i = 0; i <= len; i++) {
-			var currentCell = this.previewElements[i];
+		for ( var i = 0; i < len; i++) {
+			currentCell = this.previewElements[i];
 			txt = currentCell.innerHTML;
 			// call a method to trim left and right the text
 			txt = txt.trim();
 			// get the width in pixels of the current element
 			parentWidth = this.previewElements[i].parentNode.offsetWidth;
 			// call the method to hyphenate the text if needed
-			fixedString = this
-					.breakString(txt, parentWidth - this.HYPHEN_TYPE_WIDTH);
+			fixedString = this.breakString(txt, parentWidth
+					- this.HYPHEN_TYPE_WIDTH);
 			currentCell.innerHTML = fixedString;
 		}
 	},
@@ -107,19 +115,13 @@ Hyphenation = {
 			// increment the sum with the width of the current sign
 			// 32 - ascii for 'space', 126 - ascii for '~'
 			if (ch.charCodeAt(0) > 32 && ch.charCodeAt(0) <= 126) {
-				sum += signs[ch.charCodeAt(0) - 32] + this.LETT_SPACE;
+				sum += signs12[ch.charCodeAt(0) - 32] + this.LETT_SPACE;
 			}
 			// append the current char to the resulting string
 			resultStr += ch;
 		}
 		return resultStr;
 	},
-	
-	wbr : function (str, num) {  
-	  return str.replace(RegExp("(\\w{" + num + "})(\\w)", "g"), function(all,text,char){ 
-		return text + "<wbr>" + char; 
-	  }); 
-	},	
 
 	/**
 	 * Calculates the font-size applied on the provided tag.
@@ -146,8 +148,14 @@ String.prototype.trim = function() {
 }
 
 // the widths of the signs from 32 to 126 ascii
-var signs = new Array(1, 3, 8, 7, 10, 8, 1, 3, 3, 5, 7, 1, 4, 1, 4, 6, 3, 6, 6,
-		7, 6, 6, 6, 6, 6, 1, 1, 6, 6, 6, 6, 13, 9, 7, 8, 8, 7, 7, 9, 7, 1, 5,
-		8, 7, 9, 7, 9, 7, 9, 8, 7, 7, 7, 9, 13, 8, 9, 8, 2, 4, 2, 5, 8, 2, 6,
-		6, 5, 6, 6, 4, 6, 6, 1, 3, 6, 1, 9, 6, 6, 6, 6, 4, 5, 4, 6, 7, 9, 6, 7,
-		6, 3, 1, 3, 7);
+var signs14 = new Array(9, 1, 3, 8, 7, 10, 8, 1, 3, 3, 5, 7, 1, 4, 1, 4, 6, 3, 6,
+		6, 7, 6, 6, 6, 6, 6, 1, 1, 6, 6, 6, 6, 13, 9, 7, 8, 8, 7, 7, 9, 7, 1,
+		5, 8, 7, 9, 7, 9, 7, 9, 8, 7, 7, 7, 9, 13, 8, 9, 8, 2, 4, 2, 5, 8, 2,
+		6, 6, 5, 6, 6, 4, 6, 6, 1, 3, 6, 1, 9, 6, 6, 6, 6, 4, 5, 4, 6, 7, 9, 6,
+		7, 6, 3, 1, 3, 7);
+
+var signs12 = new Array(8, 1, 3, 7, 6, 8, 7, 1, 3, 3, 4, 6, 1, 3, 1, 3, 5, 3, 5,
+		5, 6, 5, 5, 5, 5, 5, 1, 1, 5, 5, 5, 5, 11, 8, 6, 7, 7, 6, 6, 8, 6, 1,
+		4, 7, 6, 8, 6, 8, 6, 8, 7, 6, 6, 6, 8, 11, 7, 8, 7, 2, 3, 2, 4, 7, 2,
+		5, 5, 4, 5, 5, 3, 5, 5, 1, 3, 5, 1, 8, 5, 5, 5, 5, 3, 4, 3, 5, 6, 8, 5,
+		6, 5, 3, 1, 3, 6);
