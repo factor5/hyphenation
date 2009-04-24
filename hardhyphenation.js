@@ -187,7 +187,7 @@ Hyphenation = {
 			document.getElementById('print').innerHTML = txt;
 		}
 	}
-}
+};
 
 /**
  * Trims on the left and right the provided string. It is included as method in
@@ -197,7 +197,7 @@ Hyphenation = {
  */
 String.prototype.trim = function() {
 	return this.replace(/^\s+|\s+$/g, "");
-}
+};
 
 // the widths of the signs from 32 to 1103 UTF8 when font-size = 12px
 var allSigns = new Array(0, 3, 4, 7, 7, 11, 8, 2, 4, 4, 5, 7, 3, 4, 3, 3, 7, 7,
