@@ -8,18 +8,21 @@ Hyphenation = {
 	previewElements :null,
 
 	// letter-spacing in pixels
-	LETT_SPACE :1,
+	LETT_SPACE :0,
 
 	// hyphen character provided with constructor
 	HYPHEN_TYPE :'',
 
 	// hyphens width - calculated in constructor
 	HYPHEN_TYPE_WIDTH :0,
+	
+	// compensation about letter space that we doesn't account
+	LETTER_SPACE_COMPENSATION :0,
 
-	// black space
+	// black space literal
 	SPACE :' ',
 
-	// hyphen
+	// hyphen literal
 	HYPHEN :'-',
 
 	// 9 is length of the blank space
@@ -41,14 +44,14 @@ Hyphenation = {
 	 *            the selector to be used when search for elements to process
 	 */
 	findAndFix : function(hyphenType, selector) {
-			this.HYPHEN_TYPE = '<wbr>';
-			this.HYPHEN_TYPE_WIDTH = 0;	
-		/*if (hyphenType) {
-			this.HYPHEN_TYPE = hyphenType;
-			this.HYPHEN_TYPE_WIDTH = allSigns[hyphenType.charCodeAt(0) - 32];
-		} else {
-			return;
-		}*/
+	this.HYPHEN_TYPE = '<wbr>';
+	this.HYPHEN_TYPE_WIDTH = 0;		
+//		if (hyphenType) {
+//			this.HYPHEN_TYPE = hyphenType;
+//			this.HYPHEN_TYPE_WIDTH = allSigns[hyphenType.charCodeAt(0) - 32];
+//		} else {
+//			return;
+//		}
 		if (selector) {
 			this.SELECTOR = selector;
 		} else {
@@ -81,7 +84,7 @@ Hyphenation = {
 			parentWidth = this.previewElements[i].parentNode.offsetWidth;
 			// call the method to hyphenate the text if needed
 			fixedString = this.breakString(txt, parentWidth
-					- this.HYPHEN_TYPE_WIDTH);
+					- this.HYPHEN_TYPE_WIDTH - this.LETTER_SPACE_COMPENSATION);
 			// put back the returned string into its container
 			currentCell.innerHTML = fixedString;
 		}
@@ -132,7 +135,7 @@ Hyphenation = {
 			if (ch.charCodeAt(0) >= 32 && ch.charCodeAt(0) <= 1103) {
 				// increment the sum with the width of the current sign + letter
 				// space
-				sum += allSigns[ch.charCodeAt(0) - 32] + this.LETT_SPACE;
+				sum += allSigns[ch.charCodeAt(0) - 32];
 			}
 
 			// append the current char to the resulting string
