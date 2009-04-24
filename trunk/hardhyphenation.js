@@ -1,6 +1,11 @@
 ﻿/**
- * Plugin that is used for hard hyphenation of too long strings that doesn't fit
- * to the width of the wrapper component.
+ * Plugin that is used for hard hyphenation of text that doesn't fit
+ * to the width of the wrapper component. A word breaking characters
+ * are injected in the text in order to force browser to make hyphenation.
+ * 
+ * @autor SVelikov
+ * @version 1.0
+ * @date 24.10.2009
  */
 Hyphenation = {
 
