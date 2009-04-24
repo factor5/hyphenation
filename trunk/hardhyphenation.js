@@ -15,28 +15,35 @@ Hyphenation = {
 
 	// hyphens width - calculated in constructor
 	HYPHEN_TYPE_WIDTH :0,
-	
-	// compensation about letter space that we doesn't account
-	LETTER_SPACE_COMPENSATION :0,
-
-	// black space literal
-	SPACE :' ',
-
-	// hyphen literal
-	HYPHEN :'-',
-
-	// 9 is length of the blank space
-	BLANKS_WIDTH :9,
-
-	// 7 is length of the hyphen sign
-	HYPHENS_WIDTH :7,
 
 	// selector for the elements to be processed
 	SELECTOR :'',
+	
+	// hyphen tpes enumeration
+	HYPHEN_TYPES :{ 
+		H :'<wbr>', 
+		S :'&shy;' 
+	},
+	
+	// hyphen widths enumeration
+	HYPHEN_WIDTHS :{ 
+		H :0, 
+		S :7 
+	},
+	
+	// word breaking chars enumeration
+	WBR_CHARS :{ 
+		'-' :0, 
+		' ' :1
+	},	
 
 	/**
-	 * Main method called onload. Finds all the required elements using jQuery
-	 * and calls a checkContent to process the found elements if any.
+	 * Main method called on page load. Finds all the required elements using jQuery
+	 * and calls a checkContent to process the found elements if any. Argument hyphenType
+	 * has 2 possible values 'H' - for hard hyphenation using <wbr> (zero width space) tag and
+	 * 'S' - for soft hyphenation using &shy; that inserts an hyphen char '-'  where it is situated in
+	 * the text. The selector argument is also required  as it is used for the api to know on which
+	 * elements to apply hyphenation algorithm.
 	 * 
 	 * @param hyphenType
 	 *            to be used for the hyphenation
@@ -44,14 +51,12 @@ Hyphenation = {
 	 *            the selector to be used when search for elements to process
 	 */
 	findAndFix : function(hyphenType, selector) {
-	this.HYPHEN_TYPE = '<wbr>';
-	this.HYPHEN_TYPE_WIDTH = 0;		
-//		if (hyphenType) {
-//			this.HYPHEN_TYPE = hyphenType;
-//			this.HYPHEN_TYPE_WIDTH = allSigns[hyphenType.charCodeAt(0) - 32];
-//		} else {
-//			return;
-//		}
+		if (hyphenType && hyphenType in this.HYPHEN_TYPES) {
+			this.HYPHEN_TYPE = this.HYPHEN_TYPES[hyphenType];
+			this.HYPHEN_TYPE_WIDTH = this.HYPHEN_WIDTHS[hyphenType];
+		} else {
+			return;
+		}
 		if (selector) {
 			this.SELECTOR = selector;
 		} else {
@@ -71,35 +76,31 @@ Hyphenation = {
 	 */
 	checkContent : function() {
 		var len = this.previewElements.length;
-		var currentCell = null;
-		var txt = null;
-		var parentWidth = 0;
-		var fixedString = null;
 		for ( var i = 0; i < len; i++) {
-			currentCell = this.previewElements[i];
-			txt = currentCell.innerHTML;
+			var currentCell = this.previewElements[i];
+			var txt = currentCell.innerHTML;
 			// call a method to trim left and right the text
-			// txt = txt.trim();
+			txt = txt.trim();
 			// get the width in pixels of the current element
-			parentWidth = this.previewElements[i].parentNode.offsetWidth;
+			var parentWidth = this.previewElements[i].parentNode.offsetWidth;
 			// call the method to hyphenate the text if needed
-			fixedString = this.breakString(txt, parentWidth
-					- this.HYPHEN_TYPE_WIDTH - this.LETTER_SPACE_COMPENSATION);
-			// put back the returned string into its container
+			var fixedString = this.breakString(txt, parentWidth
+					- this.HYPHEN_TYPE_WIDTH);
+			// put back the returned string into its container element
 			currentCell.innerHTML = fixedString;
 		}
 	},
 
 	/**
-	 * Parces the provided string and inserts a breaking character (hyphen or
-	 * space) on place where string is to overrun the provided width.
+	 * Parses the provided string and inserts a breaking character on place 
+	 * where string is going to overrun the provided container's width.
 	 * 
 	 * @param txt
 	 *            the text that is containing in the current element
 	 * @param the
 	 *            width of the current element
-	 * @return the string that is already fixed to match the width of the
-	 *         current element
+	 * @return the string that is already hyphenated so to match the width of the
+	 *         containing element
 	 */
 	breakString : function(txt, parentWidth) {
 		var txtLength = txt.length;
@@ -107,23 +108,24 @@ Hyphenation = {
 		var sum = 0;
 		for ( var i = 0; i < txtLength; i++) {
 			var ch = txt.substring(i, i + 1);
-			var wbr = 0;
+			// flag that shows if any word breaking char is found on the current row
+			var wbr = false;
 			// if current sign is a word-breacking one we notice that in
 			// order to know whether to insert breaking char when we reach
-			// to the end of the line (parentWidth < sum)
-			if (ch == this.HYPHEN_TYPE) {
-				wbr = 1;
+			// to the end of the line (sum >= parentWidth)
+			if (ch in this.WBR_CHARS) {
+				wbr = true;
 			}
-			// if calculated sum is to overrun the width we need to hyphenate
-			// but if we have found a breacking char earlier on the same row
-			// we doesn't inject a breaking char and rely on the browser to
-			// hyphenate
+			// if calculated sum is going to overrun the provided width we need 
+			//to hyphenate but if we have found a breacking char earlier on the 
+			// same row we doesn't inject a breaking char and rely on the browser
+			// to hyphenate (if it wants to)
 			// FIXME there is an issue under FF3 where it doesn't hyphenate
 			// properly
-			if (parentWidth < sum) {
-				// if there isn't breaking char on the row we apply hard
-				// hyphenation
-				if (wbr == 0) {
+			var increment = allSigns[ch.charCodeAt(0) - 32] + this.LETT_SPACE;
+			if ((sum + increment) >= parentWidth) {
+				// if there isn't breaking char on the row we inject word breaking char
+				if (!wbr) {
 					// insert breacking character
 					resultStr += this.HYPHEN_TYPE;
 					// clear the sum to start a new row
@@ -135,7 +137,7 @@ Hyphenation = {
 			if (ch.charCodeAt(0) >= 32 && ch.charCodeAt(0) <= 1103) {
 				// increment the sum with the width of the current sign + letter
 				// space
-				sum += allSigns[ch.charCodeAt(0) - 32];
+				sum += increment;
 			}
 
 			// append the current char to the resulting string
