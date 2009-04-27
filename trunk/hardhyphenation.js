@@ -1,7 +1,7 @@
 ﻿/**
- * Plugin that is used for hard hyphenation of text that doesn't fit
- * to the width of the wrapper component. A word breaking characters
- * are injected in the text in order to force browser to make hyphenation.
+ * Plugin that is used for hard hyphenation of text that doesn't fit to the
+ * width of the wrapper component. A word breaking characters are injected in
+ * the text in order to force browser to make hyphenation.
  * 
  * @autor SVelikov
  * @version 1.0
@@ -23,32 +23,37 @@ Hyphenation = {
 
 	// selector for the elements to be processed
 	SELECTOR :'',
-	
+
+	// constant for the '<' character that is to be escaped when the text is
+	// written back to document
+	OPEN_TAG_ENTITY :'&#60;',
+
 	// hyphen tpes enumeration
-	HYPHEN_TYPES :{ 
-		H :'<wbr>', 
-		S :'&shy;' 
+	HYPHEN_TYPES : {
+		H :'<wbr>',
+		S :'&shy;'
 	},
-	
+
 	// hyphen widths enumeration
-	HYPHEN_WIDTHS :{ 
-		H :0, 
-		S :7 
+	HYPHEN_WIDTHS : {
+		H :0,
+		S :7
 	},
-	
+
 	// word breaking chars enumeration
-	WBR_CHARS :{ 
-		'-' :0, 
+	WBR_CHARS : {
+		'-' :0,
 		' ' :1
-	},	
+	},
 
 	/**
-	 * Main method called on page load. Finds all the required elements using jQuery
-	 * and calls a checkContent to process the found elements if any. Argument hyphenType
-	 * has 2 possible values 'H' - for hard hyphenation using <wbr> (zero width space) tag and
-	 * 'S' - for soft hyphenation using &shy; that inserts an hyphen char '-'  where it is situated in
-	 * the text. The selector argument is also required  as it is used for the api to know on which
-	 * elements to apply hyphenation algorithm.
+	 * Main method called on page load. Finds all the required elements using
+	 * jQuery and calls a checkContent to process the found elements if any.
+	 * Argument hyphenType has 2 possible values 'H' - for hard hyphenation
+	 * using <wbr> (zero width space) tag and 'S' - for soft hyphenation using
+	 * &shy; that inserts an hyphen char '-' where it is situated in the text.
+	 * The selector argument is also required as it is used for the api to know
+	 * on which elements to apply hyphenation algorithm.
 	 * 
 	 * @param hyphenType
 	 *            to be used for the hyphenation
@@ -97,15 +102,15 @@ Hyphenation = {
 	},
 
 	/**
-	 * Parses the provided string and inserts a breaking character on place 
+	 * Parses the provided string and inserts a breaking character on place
 	 * where string is going to overrun the provided container's width.
 	 * 
 	 * @param txt
 	 *            the text that is containing in the current element
 	 * @param the
 	 *            width of the current element
-	 * @return the string that is already hyphenated so to match the width of the
-	 *         containing element
+	 * @return the string that is already hyphenated so to match the width of
+	 *         the containing element
 	 */
 	breakString : function(txt, parentWidth) {
 		var txtLength = txt.length;
@@ -113,7 +118,8 @@ Hyphenation = {
 		var sum = 0;
 		for ( var i = 0; i < txtLength; i++) {
 			var ch = txt.substring(i, i + 1);
-			// flag that shows if any word breaking char is found on the current row
+			// flag that shows if any word breaking char is found on the current
+			// row
 			var wbr = false;
 			// if current sign is a word-breacking one we notice that in
 			// order to know whether to insert breaking char when we reach
@@ -121,15 +127,17 @@ Hyphenation = {
 			if (ch in this.WBR_CHARS) {
 				wbr = true;
 			}
-			// if calculated sum is going to overrun the provided width we need 
-			//to hyphenate but if we have found a breacking char earlier on the 
-			// same row we doesn't inject a breaking char and rely on the browser
+			// if calculated sum is going to overrun the provided width we need
+			// to hyphenate but if we have found a breacking char earlier on the
+			// same row we doesn't inject a breaking char and rely on the
+			// browser
 			// to hyphenate (if it wants to)
 			// FIXME there is an issue under FF3 where it doesn't hyphenate
 			// properly
 			var increment = allSigns[ch.charCodeAt(0) - 32] + this.LETT_SPACE;
 			if ((sum + increment) >= parentWidth) {
-				// if there isn't breaking char on the row we inject word breaking char
+				// if there isn't breaking char on the row we inject word
+				// breaking char
 				if (!wbr) {
 					// insert breacking character
 					resultStr += this.HYPHEN_TYPE;
@@ -140,6 +148,11 @@ Hyphenation = {
 
 			// 32 - UTF8 for 'space', 1103 - UTF8 for 'who knows'
 			if (ch.charCodeAt(0) >= 32 && ch.charCodeAt(0) <= 1103) {
+				// we should replace an oppening tag '<' with its html entity
+				// equivalent
+				if (ch.charCodeAt(0) == 60) {
+					ch = this.OPEN_TAG_ENTITY;
+				}
 				// increment the sum with the width of the current sign + letter
 				// space
 				sum += increment;
