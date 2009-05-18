@@ -60,25 +60,35 @@ Hyphenation = {
 	 * @param selector
 	 *            the selector to be used when search for elements to process
 	 */
-	findAndFix : function(hyphenType, selector) {
+	run : function(hyphenType, selector) {
 		if (hyphenType && hyphenType in this.HYPHEN_TYPES) {
 			this.HYPHEN_TYPE = this.HYPHEN_TYPES[hyphenType];
 			this.HYPHEN_TYPE_WIDTH = this.HYPHEN_WIDTHS[hyphenType];
 		} else {
 			return;
 		}
-		if (selector) {
-			this.SELECTOR = selector;
+
+		if (selector !== null || selector !== undefined) {
+      if (selector.length == undefined) {
+        var selectorObj = selector;
+        for (selector in selectorObj) {
+          this.findAndFix(selectorObj[selector]);      
+        }          
+      } else {
+        this.findAndFix(selector);    
+      }
 		} else {
 			return;
 		}
-
-		this.previewElements = jQuery(this.SELECTOR);
-		if (this.previewElements.length > 0) {
-			this.checkContent();
-		}
 	},
 
+  findAndFix : function(selector) {
+    this.previewElements = jQuery(selector);
+    if (this.previewElements.length > 0) {
+      this.checkContent();
+    }   
+  },
+  
 	/**
 	 * Iterates the provided array and for every element there calculates the
 	 * elements width in pixels and calls method to hyphenate the text if needed
@@ -180,22 +190,34 @@ Hyphenation = {
 	/**
 	 * Helper function that may be used to calculate the letters width.
 	 */
-	calculateWidth : function() {
-		var ch = document.getElementById('ch');
+	calculateWidth : function(neededFSize) {
+		if (!neededFSize || (neededFSize < 6 || neededFSize > 32)) {
+			alert('Font size argument is reqired!');
+			return;
+		}
+		
+		var elDiv = document.createElement('div');
+		elDiv.id = 'elDiv';
+		elDiv.setAttribute('class', 'printOut');
+		elDiv.setAttribute('className', 'printOut');
+		elDiv.style.fontSize = neededFSize;
+		document.body.appendChild(elDiv);
+		var containerSpan = document.createElement('span');
+		document.body.appendChild(containerSpan);
 		var chWidth = 0;
 		for (i = 32; i <= 1103; i++) {
-			ch.innerHTML = String.fromCharCode(i);
-			chWidth = ch.offsetWidth;
-			this.print(chWidth + ', ', 1);
+			containerSpan.innerHTML = String.fromCharCode(i);
+			chWidth = containerSpan.offsetWidth + ', ';
+			this.print('elDiv', chWidth, 1);
 		}
 	},
 
 	/**
 	 * Helper method that prints in the html page.
 	 */
-	print : function(txt, append) {
+	print : function(id, txt, append) {
 		if (append) {
-			document.getElementById('print').innerHTML += txt;
+			document.getElementById(id).innerHTML += txt;
 		} else {
 			document.getElementById('print').innerHTML = txt;
 		}
