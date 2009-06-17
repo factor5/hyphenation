@@ -4,8 +4,6 @@
  * the text in order to force browser to make hyphenation.
  * 
  * @autor SVelikov
- * @version 1.0
- * @date 24.10.2009
  */
 Hyphenation = {
 
@@ -69,26 +67,30 @@ Hyphenation = {
 		}
 
 		if (selector !== null || selector !== undefined) {
-      if (selector.length == undefined) {
-        var selectorObj = selector;
-        for (selector in selectorObj) {
-          this.findAndFix(selectorObj[selector]);      
-        }          
-      } else {
-        this.findAndFix(selector);    
-      }
+			if (selector.length == undefined) {
+				var selectorObj = selector;
+				for (selector in selectorObj) {
+					this.findAndFix(selectorObj[selector]);
+				}
+			} else {
+				this.findAndFix(selector);
+			}
 		} else {
 			return;
 		}
 	},
 
-  findAndFix : function(selector) {
-    this.previewElements = jQuery(selector);
-    if (this.previewElements.length > 0) {
-      this.checkContent();
-    }   
-  },
-  
+	/**
+	 * 
+	 * @param selector
+	 */
+	findAndFix : function(selector) {
+		this.previewElements = jQuery(selector);
+		if (this.previewElements.length > 0) {
+			this.checkContent();
+		}
+	},
+
 	/**
 	 * Iterates the provided array and for every element there calculates the
 	 * elements width in pixels and calls method to hyphenate the text if needed
@@ -137,6 +139,39 @@ Hyphenation = {
 			if (ch in this.WBR_CHARS) {
 				wbr = true;
 			}
+
+			// if '<' sign is found assume that it is a beginning of a tag so we
+			// need to check if it is one of the following that should not be
+			// processed and if it is we just attach the found tag to the result
+			// and
+			// continue the processing of the string after the tag
+			// TODO NEED OPTIMIZATION
+			if (ch.charCodeAt(0) == 60) {
+				if ((txt.charCodeAt(i + 1) == 98 || txt.charCodeAt(i + 1) == 66)
+						&& (txt.charCodeAt(i + 2) == 62)) {
+					i += 2;
+					resultStr += '<b>';
+					continue;
+				} else if ((txt.charCodeAt(i + 1) == 47)
+						&& (txt.charCodeAt(i + 2) == 98 || txt
+								.charCodeAt(i + 2) == 66)
+						&& (txt.charCodeAt(i + 3) == 62)) {
+					i += 3;
+					resultStr += '</b>';
+					continue;
+				} else if ((txt.charCodeAt(i + 1) == 87 || txt
+						.charCodeAt(i + 1) == 119)
+						&& (txt.charCodeAt(i + 2) == 98 || txt
+								.charCodeAt(i + 2) == 66)
+						&& (txt.charCodeAt(i + 3) == 82 || txt
+								.charCodeAt(i + 3) == 114)
+						&& (txt.charCodeAt(i + 4) == 62)) {
+					i += 4;
+					resultStr += '<wbr>';
+					continue;
+				}
+			}
+
 			// if calculated sum is going to overrun the provided width we need
 			// to hyphenate but if we have found a breacking char earlier on the
 			// same row we doesn't inject a breaking char and rely on the
@@ -158,11 +193,7 @@ Hyphenation = {
 
 			// 32 - UTF8 for 'space', 1103 - UTF8 for 'who knows'
 			if (ch.charCodeAt(0) >= 32 && ch.charCodeAt(0) <= 1103) {
-				// we should replace an oppening tag '<' with its html entity
-				// equivalent
-				if (ch.charCodeAt(0) == 60) {
-					ch = this.OPEN_TAG_ENTITY;
-				}
+
 				// increment the sum with the width of the current sign + letter
 				// space
 				sum += increment;
@@ -195,7 +226,7 @@ Hyphenation = {
 			alert('Font size argument is reqired!');
 			return;
 		}
-		
+
 		var elDiv = document.createElement('div');
 		elDiv.id = 'elDiv';
 		elDiv.setAttribute('class', 'printOut');
