@@ -1,6 +1,6 @@
-#JavaScript function for text hyphenation.
+==A JavaScript function for text hyphenation.==
 
-Hardhyphenation is a script used for to break long strings that normally the browsers doesn't know how to deal with. 
+Hardhyphenation is a javascript function used for to break long strings inside html content that normally the browsers doesn't know how to deal with. 
  * In some cases it will stretch the containig element and in this way will break the layout. 
  * In others the string will continue outside of the element and eventually overlaping any other content. 
 || broken || http://hyphenation.googlecode.com/svn/trunk/Hardhyphenation_api/images/out.jpg ||
