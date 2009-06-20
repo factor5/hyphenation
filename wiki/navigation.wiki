@@ -1,3 +1,0 @@
- * [Purpose]
- * [When to use]
- * [How to use]
