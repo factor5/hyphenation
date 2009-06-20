@@ -1,3 +1,4 @@
+#sidebar navigation
 ==A JavaScript function for text hyphenation.==
 
 Hardhyphenation is a javascript function used for to break long strings inside html content that normally the browsers doesn't know how to deal with. 
