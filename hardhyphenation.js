@@ -37,16 +37,16 @@ Hyphenation = {
 	 * Object literal containing hyphen types.
 	 */	
 	HYPHEN_TYPES : {
-		H : '<wbr>',
-		S : '&shy;'
+		h : '<wbr>',
+		s : '&shy;'
 	},
 
 	/**
 	 * Object literal containing hyphen widths.
 	 */	
 	HYPHEN_WIDTHS : {
-		H : 0,
-		S : 7
+		h : 0,
+		s : 7
 	},
 
 	/**
@@ -72,9 +72,12 @@ Hyphenation = {
 	 *            the selector to be used when search for elements to process
 	 */
 	run : function (hyphenType, selector) {
-		if (hyphenType && hyphenType in this.HYPHEN_TYPES) {
-			this.HYPHEN_TYPE = this.HYPHEN_TYPES[hyphenType];
-			this.HYPHEN_TYPE_WIDTH = this.HYPHEN_WIDTHS[hyphenType];
+		if (hyphenType) {		
+			hyphenType = hyphenType.toLowerCase();
+			if (hyphenType in this.HYPHEN_TYPES) {
+				this.HYPHEN_TYPE = this.HYPHEN_TYPES[hyphenType];
+				this.HYPHEN_TYPE_WIDTH = this.HYPHEN_WIDTHS[hyphenType];
+			}
 		} else {
 			return;
 		}
@@ -119,9 +122,9 @@ Hyphenation = {
 			// call a method to trim left and right the text
 			txt = txt.trim();
 			// get the width in pixels of the current element
-			var parentWidth = previewElements[i].parentNode.offsetWidth;
+			var eleWidth = previewElements[i].offsetWidth;
 			// call the method to hyphenate the text if needed
-			var fixedString = this.breakString(txt, parentWidth - this.HYPHEN_TYPE_WIDTH);
+			var fixedString = this.breakString(txt, eleWidth - this.HYPHEN_TYPE_WIDTH);
 			// put back the returned string into its container element
 			currentCell.innerHTML = fixedString;
 		}
@@ -138,7 +141,7 @@ Hyphenation = {
 	 * @return the string that is already hyphenated so to match the width of
 	 *         the containing element
 	 */
-	breakString : function (txt, parentWidth) {
+	breakString : function (txt, eleWidth) {
 		var txtLength = txt.length;
 		var resultStr = '';
 		var sum = 0;
@@ -148,7 +151,7 @@ Hyphenation = {
 			var wbr = false;
 			// if current sign is a word-breacking one we notice that in
 			// order to know whether to insert breaking char when we reach
-			// to the end of the line (sum >= parentWidth)
+			// to the end of the line (sum >= eleWidth)
 			if (ch in this.WBR_CHARS) {
 				wbr = true;
 			}
@@ -186,7 +189,7 @@ Hyphenation = {
 			// FIXME there is an issue under FF3 where it doesn't hyphenate
 			// properly
 			var increment = this.allSigns[ch.charCodeAt(0) - 32] + this.LETT_SPACE;
-			if ((sum + increment) >= parentWidth) {
+			if ((sum + increment) >= eleWidth) {
 				// if there isn't breaking char on the row we inject word
 				// breaking char
 				if (!wbr) {
