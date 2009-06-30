@@ -145,15 +145,20 @@ Hyphenation = {
 		var txtLength = txt.length;
 		var resultStr = '';
 		var sum = 0;
+		var lineContainsWBRChar = false;
+		var ch;
+		var resetWBRFlag = false;
 		for (var i = 0; i < txtLength; i++) {
-			var ch = txt.substring(i, i + 1);
+			ch = txt.substring(i, i + 1);
 			// flag that shows if any word breaking char is found on the current row
-			var wbr = false;
+			lineContainsWBRChar = false;
+
 			// if current sign is a word-breacking one we notice that in
 			// order to know whether to insert breaking char when we reach
 			// to the end of the line (sum >= eleWidth)
 			if (ch in this.WBR_CHARS) {
-				wbr = true;
+				lineContainsWBRChar = true;
+				sum = 0;
 			}
 
 			// if '<' sign is found assume that it is a beginning of a tag so we
@@ -192,12 +197,12 @@ Hyphenation = {
 			if ((sum + increment) >= eleWidth) {
 				// if there isn't breaking char on the row we inject word
 				// breaking char
-				if (!wbr) {
+				if (!lineContainsWBRChar) {
 					// insert breacking character
 					resultStr += this.HYPHEN_TYPE;
 					// clear the sum to start a new row
 					sum = 0;
-				}
+				} 
 			}
 
 			// 32 - UTF8 for 'space', 1103 - UTF8 for 'who knows'
